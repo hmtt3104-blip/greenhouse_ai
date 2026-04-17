@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Sensors — greenhouse_ai{% endblock %}
+{% block content %}
+<h1>Sensors</h1>
+<p class="lead">Readings refresh every few seconds from <code>/api/sensors</code>. Replace the mock service with real drivers in <code>sensors/service.py</code>.</p>
+<div class="panel">
+  <div class="sensor-grid" id="sensor-grid">
+    <div class="sensor-tile"><span class="label">Temperature</span><div class="value" id="v-temp">—</div></div>
+    <div class="sensor-tile"><span class="label">Humidity</span><div class="value" id="v-hum">—</div></div>
+    <div class="sensor-tile"><span class="label">Soil moisture</span><div class="value" id="v-soil">—</div></div>
+    <div class="sensor-tile"><span class="label">Pressure</span><div class="value" id="v-pres">—</div></div>
+    <div class="sensor-tile"><span class="label">Light</span><div class="value" id="v-light">—</div></div>
+  </div>
+  <p class="meta" id="sensor-updated">Last update: —</p>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+(function () {
+  const el = (id) => document.getElementById(id);
+  function fmt(n, d) {
+    if (n == null || Number.isNaN(n)) return "—";
+    return Number(n).toFixed(d);
+  }
+  async function tick() {
+    try {
+      const r = await fetch("{{ url_for('main.api_sensors') }}", { cache: "no-store" });
+      const d = await r.json();
+      el("v-temp").textContent = fmt(d.temperature_c, 1) + " °C";
+      el("v-hum").textContent = fmt(d.humidity_pct, 1) + " %";
+      el("v-soil").textContent = fmt(d.soil_moisture_pct, 1) + " %";
+      el("v-pres").textContent = d.pressure_hpa != null ? fmt(d.pressure_hpa, 1) + " hPa" : "—";
+      el("v-light").textContent = d.light_lux != null ? Math.round(d.light_lux).toLocaleString() + " lx" : "—";
+      const t = d.timestamp ? new Date(d.timestamp * 1000) : new Date();
+      el("sensor-updated").textContent = "Last update: " + t.toLocaleString();
+    } catch (e) {
+      el("sensor-updated").textContent = "Update failed: " + e;
+    }
+  }
+  tick();
+  setInterval(tick, 4000);
+})();
+</script>
+{% endblock %}

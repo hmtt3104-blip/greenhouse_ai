@@ -1,7 +1,20 @@
-"""Entry point for the greenhouse_ai application on Raspberry Pi."""
+"""Entry point: Flask dashboard for greenhouse_ai on Raspberry Pi."""
+
+from __future__ import annotations
+
+import os
+
+from dotenv import load_dotenv
+
+from dashboard.app import create_app
+
 
 def main() -> None:
-    print("greenhouse_ai — start wiring camera, sensors, and dashboard here.")
+    load_dotenv()
+    app = create_app()
+    host = os.environ.get("DASHBOARD_HOST", "0.0.0.0")
+    port = int(os.environ.get("DASHBOARD_PORT", "5000"))
+    app.run(host=host, port=port, threaded=True, use_reloader=False)
 
 
 if __name__ == "__main__":

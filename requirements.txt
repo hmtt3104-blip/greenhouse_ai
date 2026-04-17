@@ -1,3 +1,8 @@
-# Pi / greenhouse stack — pin versions as you add dependencies.
-# python-dotenv
-# picamera2  # when using libcamera on Pi OS
+flask>=3.0.0
+python-dotenv>=1.0.0
+Pillow>=10.0.0
+requests>=2.31.0
+
+# Raspberry Pi camera — on Pi OS prefer: sudo apt install python3-picamera2
+# Or: pip install picamera2  (requires libcamera; not available on all platforms)
+# picamera2

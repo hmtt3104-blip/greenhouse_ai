@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Camera — greenhouse_ai{% endblock %}
+{% block content %}
+<h1>Live camera</h1>
+<p class="lead">Stream updates continuously in the browser. On a Pi with Picamera2 enabled, you will see the real camera feed.</p>
+<div class="panel">
+  <div class="video-box">
+    <img src="{{ url_for('main.video_feed') }}" alt="Live greenhouse camera stream" width="640" height="480">
+  </div>
+  <p class="meta">Endpoint: <code>/video_feed</code> (multipart MJPEG)</p>
+</div>
+{% endblock %}

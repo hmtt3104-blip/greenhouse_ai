@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}Telegram — greenhouse_ai{% endblock %}
+{% block content %}
+<h1>Telegram</h1>
+<p class="lead">Store your bot token and chat ID for alerts. You can also set <code>TELEGRAM_BOT_TOKEN</code> and <code>TELEGRAM_CHAT_ID</code> in <code>.env</code> (they override saved file values).</p>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    {% for category, message in messages %}
+      <div class="flash">{{ message }}</div>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+
+<div class="panel">
+  <form class="stacked" method="post" action="{{ url_for('main.telegram_page') }}">
+    <label for="bot_token">Bot token</label>
+    {% if settings.has_token %}
+    <p class="hint">Saved token: {{ settings.bot_token_display }}. Leave blank to keep it.</p>
+    {% endif %}
+    <input type="password" id="bot_token" name="bot_token" autocomplete="off" placeholder="123456789:ABC…">
+
+    <label for="chat_id">Chat ID</label>
+    <input type="text" id="chat_id" name="chat_id" value="{{ settings.chat_id or '' }}" autocomplete="off" placeholder="e.g. 123456789">
+
+    <div class="row">
+      <label>
+        <input type="checkbox" name="enabled" {% if settings.enabled %}checked{% endif %}>
+        Enable Telegram alerts
+      </label>
+    </div>
+
+    <button type="submit">Save settings</button>
+    <button type="button" class="secondary" id="btn-test">Send test message</button>
+  </form>
+  <p id="telegram-status"></p>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+(function () {
+  const status = document.getElementById("telegram-status");
+  document.getElementById("btn-test").addEventListener("click", async function () {
+    status.textContent = "Sending…";
+    status.className = "";
+    try {
+      const r = await fetch("{{ url_for('main.api_telegram_test') }}", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: "{}",
+      });
+      const j = await r.json();
+      status.textContent = j.message || (j.ok ? "OK" : "Error");
+      status.className = j.ok ? "ok" : "err";
+    } catch (e) {
+      status.textContent = String(e);
+      status.className = "err";
+    }
+  });
+})();
+</script>
+{% endblock %}

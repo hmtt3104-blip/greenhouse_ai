@@ -23,4 +23,17 @@ cp .env.example .env   # then edit .env
 python main.py
 ```
 
-On a Raspberry Pi, install OS-level dependencies (e.g. camera stack) as needed for your hardware.
+Open `http://127.0.0.1:5000` on the Pi, or from your LAN use `http://<hostname-or-ip>:5000`. Override host/port with `DASHBOARD_HOST` and `DASHBOARD_PORT`.
+
+### Dashboard (Flask)
+
+| Page | Path | Notes |
+|------|------|--------|
+| Home | `/` | Links to camera, sensors, Telegram |
+| Live camera | `/camera` | MJPEG stream at `/video_feed` (Picamera2 on Pi, placeholder otherwise) |
+| Sensors | `/sensors` | JSON API: `/api/sensors` (mock data until hardware is wired) |
+| Telegram | `/telegram` | Bot token & chat ID; test via `POST /api/telegram/test` |
+
+Telegram credentials can live in `.env` (`TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`) or in `instance/telegram.json` via the web form.
+
+On a Raspberry Pi, enable the camera stack and install **`picamera2`** (see Raspberry Pi OS docs) for a real live feed.

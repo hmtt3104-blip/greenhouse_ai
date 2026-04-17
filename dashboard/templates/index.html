@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Home — greenhouse_ai{% endblock %}
+{% block content %}
+<h1>Dashboard</h1>
+<p class="lead">Local monitoring for your Raspberry Pi greenhouse: live camera, sensor readings, and Telegram alerts.</p>
+<div class="card-grid">
+  <a class="card" href="{{ url_for('main.camera_page') }}">
+    <h3>Live camera</h3>
+    <p>MJPEG stream from Picamera2 or a placeholder when no camera is available.</p>
+  </a>
+  <a class="card" href="{{ url_for('main.sensors_page') }}">
+    <h3>Sensors</h3>
+    <p>Temperature, humidity, soil, pressure, and light (mock data until hardware is connected).</p>
+  </a>
+  <a class="card" href="{{ url_for('main.telegram_page') }}">
+    <h3>Telegram</h3>
+    <p>Configure bot token, chat ID, and send a test message.</p>
+  </a>
+</div>
+{% endblock %}

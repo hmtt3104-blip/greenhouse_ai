@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}greenhouse_ai{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="wrap">
+    <header class="site">
+      <a href="{{ url_for('main.index') }}" class="brand">greenhouse_<span>ai</span></a>
+      <nav class="nav">
+        <a href="{{ url_for('main.camera_page') }}" {% if request.endpoint == 'main.camera_page' %}class="active"{% endif %}>Camera</a>
+        <a href="{{ url_for('main.sensors_page') }}" {% if request.endpoint == 'main.sensors_page' %}class="active"{% endif %}>Sensors</a>
+        <a href="{{ url_for('main.telegram_page') }}" {% if request.endpoint == 'main.telegram_page' %}class="active"{% endif %}>Telegram</a>
+      </nav>
+    </header>
+    {% block content %}{% endblock %}
+  </div>
+  {% block scripts %}{% endblock %}
+</body>
+</html>
