@@ -1,0 +1,3 @@
+# Pi / greenhouse stack — pin versions as you add dependencies.
+# python-dotenv
+# picamera2  # when using libcamera on Pi OS
