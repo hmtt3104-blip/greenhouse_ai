@@ -18,7 +18,7 @@ log = logging.getLogger(__name__)
 
 ALERT_COOLDOWN_SEC = 60.0
 DETECTION_INTERVAL_SEC_DEFAULT = 3.0
-ALERT_MESSAGE = "Person detected by greenhouse camera"
+ALERT_MESSAGE = "Доброго дня пан Віталій 👋"
 
 _state_lock = threading.Lock()
 _detection_enabled = True
