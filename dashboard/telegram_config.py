@@ -79,6 +79,35 @@ def mask_token_display(settings: dict[str, Any]) -> dict[str, Any]:
     return out
 
 
+def send_photo(
+    bot_token: str,
+    chat_id: str,
+    image_bytes: bytes,
+    *,
+    filename: str = "snapshot.jpg",
+    caption: str = "",
+) -> tuple[bool, str]:
+    """Send a photo via Telegram Bot API (multipart)."""
+    if not bot_token or not chat_id:
+        return False, "Set bot token and chat ID first."
+    url = f"https://api.telegram.org/bot{bot_token}/sendPhoto"
+    files = {"photo": (filename, image_bytes, "image/jpeg")}
+    data: dict[str, Any] = {"chat_id": chat_id}
+    if caption:
+        data["caption"] = caption
+    try:
+        r = requests.post(url, data=data, files=files, timeout=90)
+    except requests.RequestException as e:
+        return False, str(e)
+    if r.ok:
+        return True, "Photo sent."
+    try:
+        err = r.json()
+    except Exception:
+        err = r.text[:300]
+    return False, f"HTTP {r.status_code}: {err}"
+
+
 def send_message(bot_token: str, chat_id: str, text: str) -> tuple[bool, str]:
     if not bot_token or not chat_id:
         return False, "Set bot token and chat ID first."

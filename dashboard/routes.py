@@ -50,6 +50,13 @@ def camera_page():
     return render_template("camera.html")
 
 
+@bp.route("/api/detection/status")
+def api_detection_status():
+    from camera.person_detection import get_public_status
+
+    return jsonify(get_public_status())
+
+
 @bp.route("/video_feed")
 def video_feed():
     stream = get_camera_stream()

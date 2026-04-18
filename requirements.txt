@@ -7,6 +7,6 @@ requests>=2.31.0
 # Or: pip install picamera2  (requires libcamera; not available on all platforms)
 # picamera2
 
-# Optional (faster/stronger matching than hash fallback):
-# On Raspberry Pi OS: sudo apt install python3-opencv
-# Or: pip install opencv-python (often heavy on Pi)
+# OpenCV (reference matching + person HOG detection): recommended on Pi OS:
+#   sudo apt install python3-opencv
+# Or: pip install opencv-python-headless — may be heavy on Pi 4

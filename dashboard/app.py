@@ -26,4 +26,8 @@ def create_app() -> Flask:
 
     app.register_blueprint(routes.bp)
 
+    from camera.person_detection import start_person_detection_background
+
+    start_person_detection_background(Path(app.instance_path))
+
     return app

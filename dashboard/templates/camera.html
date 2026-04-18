@@ -11,6 +11,12 @@
 </div>
 
 <div class="panel">
+  <h2>Person detection</h2>
+  <p class="lead" style="margin-top: 0.25rem;">Background HOG detection (OpenCV) runs every few seconds; alerts are limited by cooldown. Configure Telegram with <code>TELEGRAM_BOT_TOKEN</code> and <code>TELEGRAM_CHAT_ID</code>.</p>
+  <p class="meta" id="det-status">Loading…</p>
+</div>
+
+<div class="panel">
   <h2>Reference photo</h2>
   <p class="lead" style="margin-top: 0.25rem;">Capture a local reference photo (saved on the Pi), then test the current frame against it on demand.</p>
 
@@ -43,6 +49,26 @@
 {% block scripts %}
 <script>
 (function () {
+  const detStatus = document.getElementById("det-status");
+  async function pollDetection() {
+    try {
+      const r = await fetch("{{ url_for('main.api_detection_status') }}", { cache: "no-store" });
+      const j = await r.json();
+      const en = j.detection_enabled ? "yes" : "no";
+      const ocv = j.opencv_available === false ? "no (install OpenCV)" : j.opencv_available === true ? "yes" : "unknown";
+      const last = j.last_detection_time || "never";
+      detStatus.textContent =
+        "Detection enabled: " + en +
+        " · OpenCV: " + ocv +
+        " · Last person alert: " + last +
+        " · interval " + (j.interval_sec || "?") + "s · cooldown " + (j.cooldown_sec || "?") + "s";
+    } catch (e) {
+      detStatus.textContent = "Status unavailable: " + String(e);
+    }
+  }
+  pollDetection();
+  setInterval(pollDetection, 8000);
+
   const btnCapture = document.getElementById("btn-capture-ref");
   const btnTest = document.getElementById("btn-test-ref");
   const countdownEl = document.getElementById("countdown");
