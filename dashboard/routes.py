@@ -2,21 +2,32 @@
 
 from __future__ import annotations
 
+import logging
 from pathlib import Path
 
 from flask import (
     Blueprint,
     Response,
+    abort,
     current_app,
     flash,
     jsonify,
     redirect,
     render_template,
     request,
+    send_file,
     url_for,
 )
 
 from camera.stream import get_camera_stream
+from dashboard.reference_flow import (
+    compare_current_to_reference,
+    ensure_reference_dir,
+    last_test_path,
+    reference_path,
+    save_last_test_jpeg,
+    save_reference_jpeg,
+)
 from dashboard.telegram_config import (
     load_settings,
     mask_token_display,
@@ -26,6 +37,7 @@ from dashboard.telegram_config import (
 from sensors.service import get_sensor_service
 
 bp = Blueprint("main", __name__)
+log = logging.getLogger(__name__)
 
 
 @bp.route("/")
@@ -50,6 +62,70 @@ def video_feed():
             "Expires": "0",
             "X-Accel-Buffering": "no",
         },
+    )
+
+@bp.route("/reference/me.jpg")
+def reference_image():
+    path = reference_path()
+    if not path.is_file():
+        abort(404)
+    return send_file(path, mimetype="image/jpeg", conditional=True)
+
+
+@bp.route("/reference/last_test.jpg")
+def last_test_image():
+    path = last_test_path()
+    if not path.is_file():
+        abort(404)
+    return send_file(path, mimetype="image/jpeg", conditional=True)
+
+
+@bp.route("/api/reference/capture", methods=["POST"])
+def api_reference_capture():
+    ensure_reference_dir()
+    stream = get_camera_stream()
+    jpeg = stream.capture_jpeg_now()
+    out = save_reference_jpeg(jpeg)
+    log.info("reference photo saved: %s", out)
+    return jsonify(
+        {
+            "ok": True,
+            "message": "reference photo saved",
+            "reference_url": url_for("main.reference_image"),
+        }
+    )
+
+
+@bp.route("/api/reference/test", methods=["POST"])
+def api_reference_test():
+    stream = get_camera_stream()
+    jpeg = stream.capture_jpeg_now()
+    save_last_test_jpeg(jpeg)
+
+    log.info("comparison started")
+    match, has_ref = compare_current_to_reference(jpeg)
+    if not has_ref:
+        msg = "no reference match"
+        log.info("comparison result: %s (no reference file)", msg)
+        return jsonify(
+            {
+                "ok": True,
+                "message": msg,
+                "reference_exists": False,
+                "test_url": url_for("main.last_test_image"),
+            }
+        )
+
+    msg = "reference match likely" if match else "no reference match"
+    log.info("comparison result: %s", msg)
+    return jsonify(
+        {
+            "ok": True,
+            "message": msg,
+            "reference_exists": True,
+            "reference_url": url_for("main.reference_image"),
+            "test_url": url_for("main.last_test_image"),
+        }
     )
 
 

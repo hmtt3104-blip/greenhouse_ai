@@ -6,3 +6,7 @@ requests>=2.31.0
 # Raspberry Pi camera — on Pi OS prefer: sudo apt install python3-picamera2
 # Or: pip install picamera2  (requires libcamera; not available on all platforms)
 # picamera2
+
+# Optional (faster/stronger matching than hash fallback):
+# On Raspberry Pi OS: sudo apt install python3-opencv
+# Or: pip install opencv-python (often heavy on Pi)

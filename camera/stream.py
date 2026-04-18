@@ -103,6 +103,7 @@ class CameraStream:
     def __init__(self, fps: float = 12.0) -> None:
         self._fps = fps
         self._lock = threading.Lock()
+        self._picam_lock = threading.Lock()
         self._jpeg: bytes = b""
         self._thread: Optional[threading.Thread] = None
         self._running = False
@@ -180,7 +181,8 @@ class CameraStream:
         while self._running:
             if self._mode == "picamera2" and self._picam is not None:
                 try:
-                    arr = self._picam.capture_array("main")
+                    with self._picam_lock:
+                        arr = self._picam.capture_array("main")
                     if hasattr(arr, "ndim") and arr.ndim == 3:
                         ch = arr.shape[2]
                         if ch >= 3:
@@ -201,6 +203,24 @@ class CameraStream:
             with self._lock:
                 self._jpeg = jpeg
             time.sleep(interval)
+
+    def capture_jpeg_now(self) -> bytes:
+        """
+        Capture a fresh frame directly from Picamera2 when available.
+
+        If Picamera2 is unavailable/busy/errors, falls back to the latest cached
+        JPEG (or placeholder).
+        """
+        if self._mode == "picamera2" and self._picam is not None:
+            try:
+                with self._picam_lock:
+                    arr = self._picam.capture_array("main")
+                if hasattr(arr, "ndim") and arr.ndim == 3 and arr.shape[2] >= 3:
+                    arr = arr[:, :, :3]
+                return self._array_to_jpeg(arr)
+            except Exception as exc:
+                log.warning("Picamera2 capture-now failed: %s", exc)
+        return self.current_jpeg()
 
     def _array_to_jpeg(self, arr: object) -> bytes:
         from PIL import Image
